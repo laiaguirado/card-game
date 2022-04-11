@@ -97,7 +97,7 @@ class Table {
 
   dealCards() { //Repartir 7 cartas random a cada jugador
     for (let gamer of this.gamers) {
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 4; i++) {
         let randomNum = getRandomNumber(0, this.tableLength());
         let card = this.table.splice(randomNum, 1)[0];
         gamer.pickCard(card);
@@ -228,7 +228,7 @@ function score(t) { //comprobar si alguien ha ganado
   return ganador;
 }
 
-function createGamer(gamers) {
+function createGamer(gamers) { //crear jugador y ponerlo en el array gamers
   const input = document.querySelector('input');
   let g;
   if (input.value !== "") {
@@ -241,7 +241,7 @@ function createGamer(gamers) {
   }
 }
 
-function asegurarPlayers() {
+function asegurarPlayers() { //asegurar que haya el num de jugadores indicado
   const inputNumPlayers = document.querySelector('input');
   let numPlayers = inputNumPlayers.value;
   console.log("--------------------------------------------------------------------------------------");
@@ -279,7 +279,7 @@ function createStartButton() { //creamos el boton: start game!
   return startButton;
 }
 
-function displayPlayers(gamers) {
+function displayPlayers(gamers) { //mostrar por pantalla los jugadores y sus cartas
   const players = document.getElementById('players');
   players.textContent = "";
   for (let gamer of gamers) {
@@ -296,9 +296,10 @@ function displayPlayers(gamers) {
       li.append(img);
     }
   }
+  showUnoButton(turn,gamers);
 }
 
-function displayFullTableCards(cardsInGame, nameCardsInGame, table, nameTable) {
+function displayFullTableCards(cardsInGame, nameCardsInGame, table, nameTable) { //mostrar las cartas de cardsInGame y table
   const divFullTable = document.getElementById('fullTable');
   divFullTable.textContent = "";
   const divCardsInGame = document.createElement('div');
@@ -327,12 +328,12 @@ function displayFullTableCards(cardsInGame, nameCardsInGame, table, nameTable) {
   mainElement.appendChild(divFullTable);
 }
 
-function updateCardInGame(cardPreGame, cardGame) { //muestra la ultima carta que se acaba de tirar a cardsInGame
+function updateCardInGame(cardPreGame, cardGame) { //actualizar: muestra la ultima carta que se acaba de tirar a cardsInGame
   let divTable = document.getElementById('cardsInGame');
   divTable.replaceChild(cardGame, cardPreGame);
 }
 
-function updateDeskCard(cardsPreGame, card) {
+function updateDeskCard(cardsPreGame, card) { //actualizar: muestra la siguiente carta del monton de robar
   let divTable = document.getElementById('table');
   const imgCardGame = document.createElement('img');
   imgCardGame.src = card.showImage(card.cardName);
@@ -340,7 +341,7 @@ function updateDeskCard(cardsPreGame, card) {
   divTable.replaceChild(imgCardGame, cardsPreGame);
 }
 
-function displayFirstTurn(t) {
+function displayFirstTurn(t) { //dar el turno al primer jugador
   const turnDiv = document.createElement('div');
   turnDiv.setAttribute("id", "turn-info");
   const turnp = document.createElement('p');
@@ -359,7 +360,7 @@ function displayFirstTurn(t) {
   return turnButton;
 }
 
-function updateTurn(t, turn, numPlayers) {
+function updateTurn(t, turn, numPlayers) { //actualizar: dar el turno al siguiente jugador
   t.gamers[turn].myTurn();
   turn = (turn + 1) % numPlayers;
 
@@ -370,14 +371,39 @@ function updateTurn(t, turn, numPlayers) {
   return turn;
 }
 
-function updatePickup() {
+function showUnoButton(turn,gamers){
+  if(gamers[turn].cards.length <= 2 && gamers[turn].cards.length>0){
+    let player = document.getElementsByTagName('li')[turn];
 
+    let p = document.createElement('p');
+    p.setAttribute('id','uno');
+    let buttonUno = document.createElement('button')
+    buttonUno.textContent= "UNO";
+    p.append(buttonUno);
+    player.append(p);
+
+    buttonUno.addEventListener('click', (event)=>{
+      let info = document.getElementById('info');
+      let p = document.createElement('p');
+      p.setAttribute("id","playerUno")
+      p.textContent="A "+gamers[turn].name + " le queda UNO!";
+      info.appendChild(p);
+    });
+  }else{
+    let unoButton = document.getElementById('uno')
+    let unoP = document.getElementById('playerUno')
+    if(unoButton != undefined){
+      unoButton.remove();
+    }
+      if(unoP != undefined){
+        unoP.remove();
+      }
+    
+  }
 }
 
 //program....
 let turn = 0;
-let t;
-let isGameStart = false;
 const mainElement = document.querySelector('main');
 
 //form: Numero de jugadores
@@ -404,16 +430,18 @@ formNumPlayers.addEventListener('submit', (event) => {
       startButton.addEventListener('click', (event) => {
         event.preventDefault();
         startButton.remove(); //eliminar el boton: start game!
-        t = startGame(gamers); //poner los datos para empezar el juego
+        let t = startGame(gamers); //poner los datos para empezar el juego
         displayPlayers(t.gamers); //mostrar las cartas de todos los jugadores
         displayFullTableCards(t.cardsInGame, "Card in game:", t.table, "Deck of cards to take:"); //mostrar la carta en juego
         console.log(t)
 
+        let ganador = score(t); //arreglar
+        console.log("Ganador? "+ganador);
+        if (ganador == false) {
         //button: turnButton
         let turnButton = displayFirstTurn(t); //dar el turno al primer gamer
         turnButton.addEventListener('click', (event) => {
-          let ganador = score(t);
-          if (ganador == false) {
+          
             displayPlayers(t.gamers);
 
             //card: detectar si un jugador quiere tirar una carta
@@ -423,6 +451,9 @@ formNumPlayers.addEventListener('submit', (event) => {
                 let gamerTurn = t.gamers[turn];
                 for (let j = 0; j < gamerTurn.numCards(); j++) {
                   if (gamerTurn.cards[j].cardName == cardImages[i].className) {
+                    
+                    
+
                     t.throwCard(t.gamers[turn].cards[i], t.gamers[turn], j); //un jugador tira una carta
                     displayPlayers(t.gamers); //actualizar los jugadores
 
@@ -430,11 +461,13 @@ formNumPlayers.addEventListener('submit', (event) => {
                     let cardPreGame = document.getElementById('cardsInGame').querySelector('img');
                     updateCardInGame(cardPreGame, cardImages[i]);
 
+                    
+
                     turn = updateTurn(t, turn, numPlayers); //actualizamos para que le toque al siguiente cuando ha tirado el anterior
 
                     //displayPlayers(t.gamers); //actualizar los jugadores
                     console.log(t)
-                    turnButton.removeEventListener('click', (event) => { });
+                    
                   }
                 }
               });
@@ -454,10 +487,8 @@ formNumPlayers.addEventListener('submit', (event) => {
                 console.log(t);
               }
             });//card: detectar si alguien quiere robar una carta
-            ganador = score(t);
-            console.log("Ganador:" + ganador)
-          } //while: ganador
-        });//button: turnButton
+          });//button: turnButton
+        } //if: ganador
 
       });//button: Start Game
     } // if else: hay suficientes jugadores
