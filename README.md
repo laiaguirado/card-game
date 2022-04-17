@@ -1,4 +1,4 @@
-# package-card
+# Card game: UNO
 
 To run the script you have to:
  - Do "npm install" to create the node_modules directory in the frontend directory.
@@ -13,4 +13,6 @@ To play the game you have to:
 6. You can skip your turn if you pick up a card and you don't have any to throw either.
 7. Every time you throw a card or pass the turn, the new player's turn is displayed on a button. To show the cards of this, you have to press the button with the player's name.
 8. When you have two cards and you are going to throw one, you have to say UNO, so you have to press the "UNO" button before throw it.
+
+<img src="./uno-demo.png" title="Demo of the UNO game">
 
