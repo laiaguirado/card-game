@@ -284,7 +284,6 @@ function touchCard(t, cardImages, i, pickUp) {
       //comprovar si hay ha tirado una carta especial
       if(t.cardsInGame[t.cardsInGameLength() - 1].cardName.includes("+4") ||
       t.cardsInGame[t.cardsInGameLength() - 1].cardName.includes("+2") ){
-        console.log("he entrado")
         pickUp = true;
       }
       if(t.cardsInGame[t.cardsInGameLength() - 1].cardName.includes("Direction")){
